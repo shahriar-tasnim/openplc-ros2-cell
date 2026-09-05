@@ -1,5 +1,8 @@
 from setuptools import find_packages, setup
 
+import os
+from glob import glob
+
 package_name = 'pick_place_cell_controller'
 
 setup(
@@ -15,6 +18,8 @@ setup(
             'share/' + package_name,
             ['package.xml'],
         ),
+        (os.path.join('lib', 'python3.12', 'site-packages', 'pick_place_cell_controller'),
+        glob('pick_place_cell_controller/*.urdf')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

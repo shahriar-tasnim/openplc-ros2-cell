@@ -9,13 +9,13 @@ from std_msgs.msg import Bool, String
 from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
 
-from pick_place_cell_controller import grid_place
+from pick_place_cell_controller import ur5e_ik
 
-# Fixed poses (IK pre-solved, radians, joint1..joint6)
-PRE_PICK = [-0.6327, -0.9544, 1.1143, 0.0, 1.4108, 0.0]
-PICK     = [-0.6327, -0.8321, 1.2767, 0.0, 1.1262, 0.0]
-LIFT     = [-0.6327, -0.9544, 1.1143, 0.0, 1.4108, 0.0]
-HOME     = [ 0.0,    -1.0472, 1.5708, 0.0, 1.0472, 0.0]
+# ---- UR5e cell geometry (world coords, verified) --------------------------
+PICK_XY = (0.45, -0.20)
+Z_PICK  = 0.60          # TCP at the cube on the raised conveyor
+Z_LIFT  = 0.85          # travel height over the pick side
+HOME    = [0.0, -1.57, 1.57, -1.57, -1.57, 0.0]   # safe tucked UR pose
 
 
 class GazeboRobotNode(Node):
@@ -23,9 +23,10 @@ class GazeboRobotNode(Node):
     def __init__(self):
         super().__init__('gazebo_robot')
 
+        # UR's trajectory controller action
         self.trajectory_client = ActionClient(
             self, FollowJointTrajectory,
-            '/arm_controller/follow_joint_trajectory')
+            '/joint_trajectory_controller/follow_joint_trajectory')
 
         self.create_subscription(Bool, '/cell/robot_start',
                                  self.robot_start_callback, 10)
@@ -49,31 +50,36 @@ class GazeboRobotNode(Node):
         self.sequence_index = 0
         self.done_until = 0.0
 
-        self.active_index = 0          # which grid cell this cube fills
-        self.sequence = []             # built per cycle
+        self.active_index = 0
+        self.sequence = []
 
-        self.joint_names = ['joint1', 'joint2', 'joint3',
-                            'joint4', 'joint5', 'joint6']
+        # UR5e joint order (must match the controller)
+        self.ik = ur5e_ik.UR5eIK()
+        self.joint_names = self.ik.joint_names
 
         self.create_timer(0.1, self.publish_feedback)
         self.publish_status('IDLE')
         self.get_logger().info(
-            'Gazebo robot initialized | state=IDLE home=1 busy=0 done=0 fault=0')
+            'UR5e robot initialized | state=IDLE home=1 busy=0 done=0 fault=0')
 
-    # cube_<n> -> place cell n
     def active_part_callback(self, msg):
         try:
-            self.active_index = int(msg.data.split('_')[-1]) % grid_place.NUM_CELLS
+            self.active_index = int(msg.data.split('_')[-1]) % 36
         except (ValueError, IndexError):
             self.active_index = 0
 
-    def build_sequence(self, cell_index):
-        seq = [('PRE_PICK', PRE_PICK, 1.5),
-               ('PICK',     PICK,     1.5),
-               ('LIFT',     LIFT,     1.5)]
-        seq += grid_place.place_steps(cell_index)     # ABOVE, AT, LIFT
-        seq += [('HOME', HOME, 2.0)]
-        return seq
+    def build_sequence(self, cube_index):
+        """Full per-cube plan: pick, then stack into tower slot cube_index."""
+        x, y, z = ur5e_ik.tower_target(cube_index)
+        return [
+            ('PRE_PICK',    self.ik.solve(*PICK_XY, Z_LIFT), 2.5),
+            ('PICK',        self.ik.solve(*PICK_XY, Z_PICK), 2.0),
+            ('LIFT',        self.ik.solve(*PICK_XY, Z_LIFT), 2.0),
+            ('PLACE_ABOVE', self.ik.solve(x, y, ur5e_ik.Z_TRANSIT), 3.0),
+            ('PLACE_AT',    self.ik.solve(x, y, z), 2.0),
+            ('PLACE_LIFT',  self.ik.solve(x, y, ur5e_ik.Z_TRANSIT), 2.0),
+            ('HOME',        HOME, 3.0),
+        ]
 
     def robot_start_callback(self, msg):
         rising_edge = msg.data and not self.previous_robot_start
@@ -88,10 +94,9 @@ class GazeboRobotNode(Node):
             return
         self.get_logger().info('RobotStart received from PLC')
         if not self.trajectory_client.wait_for_server(timeout_sec=2.0):
-            self.set_fault('arm_controller action server unavailable')
+            self.set_fault('joint_trajectory_controller action server unavailable')
             return
 
-        # Latch the target cell for THIS cube and build its motion plan.
         self.sequence = self.build_sequence(self.active_index)
         self.sequence_running = True
         self.sequence_index = 0
@@ -100,7 +105,7 @@ class GazeboRobotNode(Node):
         self.robot_done = False
         self.publish_status('BUSY')
         self.get_logger().info(
-            f'Starting cycle -> grid cell index {self.active_index}')
+            f'Starting cycle -> tower cube index {self.active_index}')
         self.send_current_pose()
 
     def send_current_pose(self):

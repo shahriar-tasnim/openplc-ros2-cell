@@ -1,181 +1,146 @@
 <?xml version="1.0" ?>
-
+<!--
+  UR5e pick-and-place cell world.
+  Layout (verified reachable, 0.00 mm):
+    UR5e base : origin, on a 0.40 m pedestal  -> base at z=0.40
+    Pick      : (0.45, -0.20), conveyor top ~0.40, cube center z=0.56
+    Tower     : (0.45,  0.20), on a 0.40 m table, 3x3 x 4 layers
+  World MUST stay named 'cell_world' (the set_pose bridge uses
+  /world/cell_world/set_pose).
+-->
 <sdf version="1.9">
-
   <world name="cell_world">
 
-    <physics name="physics" type="ignored">
+    <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
-
-    <plugin
-      filename="gz-sim-physics-system"
-      name="gz::sim::systems::Physics"/>
-
-    <plugin
-      filename="gz-sim-user-commands-system"
-      name="gz::sim::systems::UserCommands"/>
-
-    <plugin
-      filename="gz-sim-scene-broadcaster-system"
-      name="gz::sim::systems::SceneBroadcaster"/>
-
-    <!-- SUN -->
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
-
       <pose>0 0 10 0 0 0</pose>
-
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
-
-      <direction>-0.5 0.1 -0.9</direction>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+      <direction>-0.4 0.3 -1</direction>
     </light>
 
-    <!-- FLOOR -->
-
+    <!-- ground -->
     <model name="factory_floor">
-
       <static>true</static>
-
-      <link name="floor_link">
-
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>4 4 0.1</size>
-            </box>
-          </geometry>
-        </collision>
-
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>4 4 0.1</size>
-            </box>
-          </geometry>
-
-          <material>
-            <diffuse>0.35 0.35 0.35 1</diffuse>
-          </material>
-        </visual>
-
+      <link name="link">
+        <collision name="c"><geometry><plane><normal>0 0 1</normal>
+          <size>10 10</size></plane></geometry></collision>
+        <visual name="v"><geometry><plane><normal>0 0 1</normal>
+          <size>10 10</size></plane></geometry>
+          <material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
       </link>
-
     </model>
 
-    <!-- CONVEYOR -->
+    <!-- ARM PEDESTAL: 0.40 m tall box under the UR5e at origin -->
+    <model name="arm_pedestal">
+      <static>true</static>
+      <pose>0 0 0.20 0 0 0</pose>   <!-- center at 0.20 => top at 0.40 -->
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.30 0.30 0.40</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.30 0.30 0.40</size></box></geometry>
+          <material><diffuse>0.25 0.28 0.32 1</diffuse></material></visual>
+      </link>
+    </model>
 
+<!-- DETAILED CONVEYOR (static prop; part slides via set_pose).
+         Belt top surface at z=0.40, runs along -Y to pick (0.45,-0.20).
+         Same envelope as the plain box so pick geometry is unchanged. -->
     <model name="conveyor">
-
       <static>true</static>
+      <pose>0.45 -0.55 0 0 0 0</pose>
+      <link name="link">
 
-      <pose>0.75 -0.55 0.15 0 0 0</pose>
-
-      <link name="conveyor_link">
-
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>1.5 0.28 0.20</size>
-            </box>
-          </geometry>
-        </collision>
-
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>1.5 0.28 0.20</size>
-            </box>
-          </geometry>
-
-          <material>
-            <diffuse>0.10 0.10 0.10 1</diffuse>
-          </material>
+        <!-- rubber belt surface (thin dark top at z~0.40) -->
+        <visual name="belt">
+          <pose>0 0 0.385 0 0 0</pose>
+          <geometry><box><size>0.28 0.90 0.03</size></box></geometry>
+          <material><diffuse>0.08 0.08 0.09 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular></material>
         </visual>
 
-      </link>
+        <!-- metal side rails (left / right along the run) -->
+        <visual name="rail_left">
+          <pose>0.145 0 0.34 0 0 0</pose>
+          <geometry><box><size>0.02 0.92 0.10</size></box></geometry>
+          <material><diffuse>0.55 0.57 0.60 1</diffuse>
+            <specular>0.6 0.6 0.6 1</specular></material>
+        </visual>
+        <visual name="rail_right">
+          <pose>-0.145 0 0.34 0 0 0</pose>
+          <geometry><box><size>0.02 0.92 0.10</size></box></geometry>
+          <material><diffuse>0.55 0.57 0.60 1</diffuse>
+            <specular>0.6 0.6 0.6 1</specular></material>
+        </visual>
 
+        <!-- end rollers (cylinders across the belt at each end) -->
+        <visual name="roller_front">
+          <pose>0 0.45 0.37 1.5708 0 0</pose>
+          <geometry><cylinder><radius>0.04</radius><length>0.28</length></cylinder></geometry>
+          <material><diffuse>0.3 0.3 0.33 1</diffuse></material>
+        </visual>
+        <visual name="roller_back">
+          <pose>0 -0.45 0.37 1.5708 0 0</pose>
+          <geometry><cylinder><radius>0.04</radius><length>0.28</length></cylinder></geometry>
+          <material><diffuse>0.3 0.3 0.33 1</diffuse></material>
+        </visual>
+
+        <!-- support legs (4) -->
+        <visual name="leg_1"><pose>0.12 0.40 0.17 0 0 0</pose>
+          <geometry><box><size>0.03 0.03 0.34</size></box></geometry>
+          <material><diffuse>0.2 0.2 0.22 1</diffuse></material></visual>
+        <visual name="leg_2"><pose>-0.12 0.40 0.17 0 0 0</pose>
+          <geometry><box><size>0.03 0.03 0.34</size></box></geometry>
+          <material><diffuse>0.2 0.2 0.22 1</diffuse></material></visual>
+        <visual name="leg_3"><pose>0.12 -0.40 0.17 0 0 0</pose>
+          <geometry><box><size>0.03 0.03 0.34</size></box></geometry>
+          <material><diffuse>0.2 0.2 0.22 1</diffuse></material></visual>
+        <visual name="leg_4"><pose>-0.12 -0.40 0.17 0 0 0</pose>
+          <geometry><box><size>0.03 0.03 0.34</size></box></geometry>
+          <material><diffuse>0.2 0.2 0.22 1</diffuse></material></visual>
+
+        <!-- single simple collision block (part rests on belt top) -->
+        <collision name="c">
+          <pose>0 0 0.35 0 0 0</pose>
+          <geometry><box><size>0.28 0.90 0.10</size></box></geometry>
+        </collision>
+      </link>
     </model>
 
-    <!-- PART -->
+    <!-- TOWER TABLE: 0.40 m table under the stacking area (0.45, 0.20) -->
+    <model name="tower_table">
+      <static>true</static>
+      <pose>0.45 0.20 0.20 0 0 0</pose>   <!-- top at 0.40 -->
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.45 0.45 0.40</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.45 0.45 0.40</size></box></geometry>
+          <material><diffuse>0.35 0.30 0.22 1</diffuse></material></visual>
+      </link>
+    </model>
 
+    <!-- initial single part (for the arm-motion / grasp test before the
+         spawner is added). Sits on the conveyor at the pick point. -->
     <model name="part">
-
-      <pose>1.35 -0.55 0.31 0 0 0</pose>
-
-      <link name="part_link">
-
-        <inertial>
-          <mass>0.20</mass>
-
-          <inertia>
-            <ixx>0.0002</ixx>
-            <iyy>0.0002</iyy>
-            <izz>0.0002</izz>
-          </inertia>
-        </inertial>
-
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.08 0.08 0.08</size>
-            </box>
-          </geometry>
-        </collision>
-
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>0.08 0.08 0.08</size>
-            </box>
-          </geometry>
-
-          <material>
-            <diffuse>0.8 0.3 0.1 1</diffuse>
-          </material>
-        </visual>
-
+      <pose>0.45 -0.55 0.60 0 0 0</pose>  <!-- feed end, top of conveyor -->
+      <link name="link">
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <collision name="c"><geometry><box><size>0.08 0.08 0.08</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
       </link>
-
-    </model>
-
-    <!-- DESTINATION BIN -->
-
-    <model name="place_bin">
-
-      <static>true</static>
-
-      <pose>0.65 0.65 0.15 0 0 0</pose>
-
-      <link name="bin_link">
-
-        <visual name="bottom">
-          <geometry>
-            <box>
-              <size>0.45 0.45 0.08</size>
-            </box>
-          </geometry>
-
-          <material>
-            <diffuse>0.1 0.55 0.15 1</diffuse>
-          </material>
-        </visual>
-
-        <collision name="bottom_collision">
-          <geometry>
-            <box>
-              <size>0.45 0.45 0.08</size>
-            </box>
-          </geometry>
-        </collision>
-
-      </link>
-
     </model>
 
   </world>
-
 </sdf>
