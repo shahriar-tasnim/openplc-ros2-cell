@@ -9,13 +9,7 @@ from std_msgs.msg import Bool, String
 from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
 
-from pick_place_cell_controller import ur5e_ik
-
-# ---- UR5e cell geometry (world coords, verified) --------------------------
-PICK_XY = (0.45, -0.20)
-Z_PICK  = 0.60          # TCP at the cube on the raised conveyor
-Z_LIFT  = 0.85          # travel height over the pick side
-HOME    = [0.0, -1.57, 1.57, -1.57, -1.57, 0.0]   # safe tucked UR pose
+from pick_place_cell_controller import baked_poses as bp
 
 
 class GazeboRobotNode(Node):
@@ -23,7 +17,6 @@ class GazeboRobotNode(Node):
     def __init__(self):
         super().__init__('gazebo_robot')
 
-        # UR's trajectory controller action
         self.trajectory_client = ActionClient(
             self, FollowJointTrajectory,
             '/joint_trajectory_controller/follow_joint_trajectory')
@@ -49,13 +42,10 @@ class GazeboRobotNode(Node):
         self.sequence_running = False
         self.sequence_index = 0
         self.done_until = 0.0
-
         self.active_index = 0
         self.sequence = []
 
-        # UR5e joint order (must match the controller)
-        self.ik = ur5e_ik.UR5eIK()
-        self.joint_names = self.ik.joint_names
+        self.joint_names = bp.JOINT_NAMES
 
         self.create_timer(0.1, self.publish_feedback)
         self.publish_status('IDLE')
@@ -64,22 +54,18 @@ class GazeboRobotNode(Node):
 
     def active_part_callback(self, msg):
         try:
-            self.active_index = int(msg.data.split('_')[-1]) % 36
+            self.active_index = int(msg.data.split('_')[-1]) % bp.NUM_CUBES
         except (ValueError, IndexError):
             self.active_index = 0
 
     def build_sequence(self, cube_index):
-        """Full per-cube plan: pick, then stack into tower slot cube_index."""
-        x, y, z = ur5e_ik.tower_target(cube_index)
-        return [
-            ('PRE_PICK',    self.ik.solve(*PICK_XY, Z_LIFT), 2.5),
-            ('PICK',        self.ik.solve(*PICK_XY, Z_PICK), 2.0),
-            ('LIFT',        self.ik.solve(*PICK_XY, Z_LIFT), 2.0),
-            ('PLACE_ABOVE', self.ik.solve(x, y, ur5e_ik.Z_TRANSIT), 3.0),
-            ('PLACE_AT',    self.ik.solve(x, y, z), 2.0),
-            ('PLACE_LIFT',  self.ik.solve(x, y, ur5e_ik.Z_TRANSIT), 2.0),
-            ('HOME',        HOME, 3.0),
-        ]
+        """PRE_PICK, PICK, LIFT, PLACE_ABOVE, PLACE_AT, PLACE_LIFT, HOME."""
+        poses = bp.POSES[cube_index % bp.NUM_CUBES]
+        # generous durations; first move (from HOME) gets the most time
+        durations = [3.0, 2.0, 2.0, 3.0, 2.0, 2.0]
+        seq = [(bp.WAYPOINT_NAMES[k], poses[k], durations[k]) for k in range(6)]
+        seq.append(('HOME', bp.HOME, 3.0))
+        return seq
 
     def robot_start_callback(self, msg):
         rising_edge = msg.data and not self.previous_robot_start
