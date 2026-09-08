@@ -130,17 +130,433 @@
 
     <!-- initial single part (for the arm-motion / grasp test before the
          spawner is added). Sits on the conveyor at the pick point. -->
-    <model name="part">
-      <pose>0.45 -0.55 0.60 0 0 0</pose>  <!-- feed end, top of conveyor -->
+
+    <!-- VISUAL parallel-jaw gripper. Spawned here; gripper_follower node
+         glues it to tool0. Starts near the arm flange. -->
+    <model name="gripper">
+      <pose>0 0 1.0 0 0 0</pose>
       <link name="link">
+        <!-- gripper body -->
+        <visual name="body">
+          <pose>0 0 0.025 0 0 0</pose>
+          <geometry><box><size>0.07 0.07 0.05</size></box></geometry>
+          <material><diffuse>0.15 0.15 0.17 1</diffuse></material>
+        </visual>
+        <!-- left finger -->
+        <visual name="finger_l">
+          <pose>0 0.028 0.085 0 0 0</pose>
+          <geometry><box><size>0.02 0.015 0.07</size></box></geometry>
+          <material><diffuse>0.55 0.57 0.6 1</diffuse></material>
+        </visual>
+        <!-- right finger -->
+        <visual name="finger_r">
+          <pose>0 -0.028 0.085 0 0 0</pose>
+          <geometry><box><size>0.02 0.015 0.07</size></box></geometry>
+          <material><diffuse>0.55 0.57 0.6 1</diffuse></material>
+        </visual>
+        <inertial><mass>0.001</mass>
+          <inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+      </link>
+      <!-- no gravity: it's kinematically driven by the follower -->
+      <static>false</static>
+    </model>
+
+    <model name="cube_0">
+      <pose>2.0 -1.6 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
         <inertial><mass>0.2</mass>
           <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
-        <collision name="c"><geometry><box><size>0.08 0.08 0.08</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
           <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
       </link>
     </model>
-
+    <model name="cube_1">
+      <pose>2.16 -1.6 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_2">
+      <pose>2.32 -1.6 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_3">
+      <pose>2.48 -1.6 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_4">
+      <pose>2.64 -1.6 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_5">
+      <pose>2.8 -1.6 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_6">
+      <pose>2.0 -1.44 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_7">
+      <pose>2.16 -1.44 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_8">
+      <pose>2.32 -1.44 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_9">
+      <pose>2.48 -1.44 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_10">
+      <pose>2.64 -1.44 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_11">
+      <pose>2.8 -1.44 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_12">
+      <pose>2.0 -1.28 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_13">
+      <pose>2.16 -1.28 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_14">
+      <pose>2.32 -1.28 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_15">
+      <pose>2.48 -1.28 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_16">
+      <pose>2.64 -1.28 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_17">
+      <pose>2.8 -1.28 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_18">
+      <pose>2.0 -1.12 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_19">
+      <pose>2.16 -1.12 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_20">
+      <pose>2.32 -1.12 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_21">
+      <pose>2.48 -1.12 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_22">
+      <pose>2.64 -1.12 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_23">
+      <pose>2.8 -1.12 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_24">
+      <pose>2.0 -0.96 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_25">
+      <pose>2.16 -0.96 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_26">
+      <pose>2.32 -0.96 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_27">
+      <pose>2.48 -0.96 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_28">
+      <pose>2.64 -0.96 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_29">
+      <pose>2.8 -0.96 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_30">
+      <pose>2.0 -0.8 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_31">
+      <pose>2.16 -0.8 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_32">
+      <pose>2.32 -0.8 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_33">
+      <pose>2.48 -0.8 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_34">
+      <pose>2.64 -0.8 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cube_35">
+      <pose>2.8 -0.8 0.04 0 0 0</pose>
+      <link name="link">
+        <gravity>0</gravity>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+        <visual name="v"><geometry><box><size>0.08 0.08 0.08</size></box></geometry>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
   </world>
 </sdf>

@@ -2,14 +2,15 @@
 cell_bringup.launch.py -- ONE-COMMAND launch for the UR5e pick-and-place cell.
 
 Starts everything in the correct order with delays so the Modbus bridge is
-up before the PLC-facing nodes, avoiding the coil-write binding problem:
+up before the PLC-facing nodes (avoids the coil-write binding problem):
 
-  0s : Gazebo + UR5e + controllers (cell_sim.launch.py)
-  6s : modbus_bridge      (must be up before OpenPLC starts)
-  8s : gazebo_robot        (UR5e motion node)
-  9s : conveyor
- 10s : grasp_manager
- 12s : part_spawner        (continuous flow; comment out for single-cube tests)
+  0s  : Gazebo + UR5e + controllers (cell_sim.launch.py)
+  6s  : modbus_bridge      (must be up before OpenPLC starts)
+  8s  : gazebo_robot        (UR5e motion node)
+  9s  : conveyor
+ 10s  : grasp_manager
+ 11s  : gripper_follower    (glues the visual gripper to tool0)
+ 12s  : part_spawner        (continuous flow; comment out for single-cube)
 
 You still start the OpenPLC Runtime yourself, LAST, after this is up
 (Connect -> transfer -> Start), then Reset -> Start to run cycles.
@@ -37,7 +38,7 @@ def generate_launch_description():
                     executable=exe, output='screen')
 
     return LaunchDescription([
-        cell,                                                   # 0s
+        cell,                                                     # 0s
         TimerAction(period=6.0,  actions=[ctrl('modbus_bridge')]),
         TimerAction(period=8.0,  actions=[ctrl('gazebo_robot')]),
         TimerAction(period=9.0,  actions=[ctrl('conveyor')]),

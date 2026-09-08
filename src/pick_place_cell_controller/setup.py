@@ -36,6 +36,7 @@ setup(
             'conveyor = pick_place_cell_controller.conveyor_node:main',
             'grasp_manager = pick_place_cell_controller.grasp_manager:main',
             'part_spawner = pick_place_cell_controller.part_spawner:main',
+            'gripper_follower = pick_place_cell_controller.gripper_follower:main',
         ],
     },
 )

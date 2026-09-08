@@ -1,264 +1,107 @@
 #!/usr/bin/env python3
+"""
+conveyor_node.py -- moves the ACTIVE cube along the UR5e conveyor (in Y)
+from the feed end to the pick point, then raises PartAtPick.
 
+UR5e cell coordinates:
+    x = 0.45 (constant),  z = 0.44 (belt top + half cube)
+    feed  y = -0.85  ->  pick y = -0.20
+"""
 import rclpy
 from rclpy.node import Node
-
-from std_msgs.msg import Bool
-
+from std_msgs.msg import Bool, String
 from ros_gz_interfaces.srv import SetEntityPose
 from ros_gz_interfaces.msg import Entity
 
 
 class ConveyorNode(Node):
-
     def __init__(self):
         super().__init__('conveyor_node')
-
-        # ============================================================
-        # Conveyor geometry
-        # ============================================================
-
-        self.start_x = 1.35
-        self.pick_x = 0.75
-
-        self.part_y = -0.55
-        self.part_z = 0.31
-
-        # m/s
+        self.part_x = 0.45
+        self.feed_y = -0.85
+        self.pick_y = -0.20
+        self.part_z = 0.44
         self.speed = 0.20
-
-        # Timer = 50 ms
         self.dt = 0.05
-
-        self.current_x = self.start_x
-
-        # ============================================================
-        # State
-        # ============================================================
+        self.current_y = self.feed_y
+        self.part_name = 'cube_0'
 
         self.conveyor_run = False
         self.part_at_pick = False
         self.robot_busy = False
-
         self.pose_request_pending = False
 
-        # ============================================================
-        # PLC / ROS communication
-        # ============================================================
+        self.create_subscription(Bool, '/cell/conveyor_run', self.conveyor_cb, 10)
+        self.create_subscription(Bool, '/cell/robot_busy', self.busy_cb, 10)
+        self.create_subscription(String, '/cell/active_part', self.active_cb, 10)
+        self.part_at_pick_pub = self.create_publisher(Bool, '/cell/part_at_pick', 10)
+        self.pose_client = self.create_client(SetEntityPose, '/world/cell_world/set_pose')
+        self.create_timer(self.dt, self.update)
+        self.get_logger().info(f'Conveyor initialized | feed y={self.feed_y} | pick y={self.pick_y}')
 
-        self.create_subscription(
-            Bool,
-            '/cell/conveyor_run',
-            self.conveyor_callback,
-            10
-        )
-
-        self.create_subscription(
-            Bool,
-            '/cell/robot_busy',
-            self.robot_busy_callback,
-            10
-        )
-
-        self.part_at_pick_pub = self.create_publisher(
-            Bool,
-            '/cell/part_at_pick',
-            10
-        )
-
-        # ============================================================
-        # Gazebo SetEntityPose service
-        # ============================================================
-
-        self.pose_client = self.create_client(
-            SetEntityPose,
-            '/world/cell_world/set_pose'
-        )
-
-        self.create_timer(
-            self.dt,
-            self.update
-        )
-
-        self.get_logger().info(
-            'Conveyor initialized | '
-            'part x=1.35 | pick x=0.75'
-        )
-
-    # ================================================================
-    # Conveyor command from PLC
-    # ================================================================
-
-    def conveyor_callback(self, msg):
-
-        previous = self.conveyor_run
-
-        self.conveyor_run = msg.data
-
-        if self.conveyor_run and not previous:
-
-            self.get_logger().info(
-                'ConveyorRun received from PLC'
-            )
-
-        elif previous and not self.conveyor_run:
-
-            self.get_logger().info(
-                'Conveyor stopped'
-            )
-
-    # ================================================================
-    # Robot takes responsibility for the part
-    # ================================================================
-
-    def robot_busy_callback(self, msg):
-
-        rising_edge = (
-            msg.data and
-            not self.robot_busy
-        )
-
-        self.robot_busy = msg.data
-
-        if rising_edge and self.part_at_pick:
-
-            # Once robot starts handling the part,
-            # remove the pick sensor signal.
+    def active_cb(self, msg):
+        if msg.data != self.part_name:
+            self.part_name = msg.data
+            self.current_y = self.feed_y
             self.part_at_pick = False
+            self.get_logger().info(f'New active part {self.part_name} | belt reset')
 
-            self.get_logger().info(
-                'RobotBusy received | '
-                'PartAtPick cleared'
-            )
+    def conveyor_cb(self, msg):
+        prev = self.conveyor_run
+        self.conveyor_run = msg.data
+        if self.conveyor_run and not prev:
+            self.get_logger().info('ConveyorRun received from PLC')
 
-    # ================================================================
-    # Main conveyor update
-    # ================================================================
+    def busy_cb(self, msg):
+        rising = msg.data and not self.robot_busy
+        self.robot_busy = msg.data
+        if rising and self.part_at_pick:
+            self.part_at_pick = False
+            self.get_logger().info('RobotBusy | PartAtPick cleared')
 
     def update(self):
-
-        # Always publish sensor state so that the
-        # Modbus bridge has a persistent current value.
-        sensor_msg = Bool()
-
-        sensor_msg.data = self.part_at_pick
-
-        self.part_at_pick_pub.publish(
-            sensor_msg
-        )
-
-        # Don't move unless PLC commands the conveyor.
-        if not self.conveyor_run:
-
+        self.part_at_pick_pub.publish(Bool(data=self.part_at_pick))
+        if not self.conveyor_run or self.part_at_pick or self.robot_busy:
             return
-
-        # Stop once the part reaches the sensor.
-        if self.part_at_pick:
-
-            return
-
-        # Don't move once robot is working.
-        if self.robot_busy:
-
-            return
-
-        # Move toward robot.
-        step = self.speed * self.dt
-
-        self.current_x -= step
-
-        if self.current_x <= self.pick_x:
-
-            self.current_x = self.pick_x
-
+        self.current_y += self.speed * self.dt      # move toward pick (+Y)
+        if self.current_y >= self.pick_y:
+            self.current_y = self.pick_y
             self.part_at_pick = True
-
-            self.get_logger().info(
-                'PART DETECTED at pick station | '
-                'PartAtPick=TRUE'
-            )
-
+            self.get_logger().info('PART DETECTED at pick | PartAtPick=TRUE')
         self.set_part_pose()
 
-    # ================================================================
-    # Move cube inside Gazebo
-    # ================================================================
-
     def set_part_pose(self):
-
-        if self.pose_request_pending:
-
+        if self.pose_request_pending or not self.pose_client.service_is_ready():
             return
-
-        if not self.pose_client.service_is_ready():
-
-            return
-
-        request = SetEntityPose.Request()
-
-        request.entity.name = 'part'
-        request.entity.type = Entity.MODEL
-
-        request.pose.position.x = self.current_x
-        request.pose.position.y = self.part_y
-        request.pose.position.z = self.part_z
-
-        request.pose.orientation.x = 0.0
-        request.pose.orientation.y = 0.0
-        request.pose.orientation.z = 0.0
-        request.pose.orientation.w = 1.0
-
+        req = SetEntityPose.Request()
+        req.entity.name = self.part_name
+        req.entity.type = Entity.MODEL
+        req.pose.position.x = self.part_x
+        req.pose.position.y = self.current_y
+        req.pose.position.z = self.part_z
+        req.pose.orientation.w = 1.0
         self.pose_request_pending = True
+        fut = self.pose_client.call_async(req)
+        fut.add_done_callback(self.pose_resp)
 
-        future = self.pose_client.call_async(
-            request
-        )
-
-        future.add_done_callback(
-            self.pose_response
-        )
-
-    # ================================================================
-    # Gazebo service response
-    # ================================================================
-
-    def pose_response(self, future):
-
+    def pose_resp(self, future):
         self.pose_request_pending = False
-
         try:
-
-            result = future.result()
-
-            if not result.success:
-
-                self.get_logger().warn(
-                    'Gazebo failed to move part'
-                )
-
+            r = future.result()
+            if not r.success:
+                self.get_logger().warn('Gazebo failed to move part')
         except Exception as exc:
-
-            self.get_logger().error(
-                f'SetEntityPose failed: {exc}'
-            )
+            self.get_logger().error(f'SetEntityPose failed: {exc}')
 
 
 def main(args=None):
-
     rclpy.init(args=args)
-
     node = ConveyorNode()
-
     try:
-
         rclpy.spin(node)
-
     except KeyboardInterrupt:
-
         pass
-
     finally:
-
         node.destroy_node()
         rclpy.shutdown()
 

@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-grasp_manager.py -- kinematic grasp for the UR5e cell, WITH live coordinate
-readout so you can verify/correct poses.
+grasp_manager.py -- scripted kinematic grasp for the UR5e cell.
 
-At PICK and PLACE it prints:
-  * tool0 position (where the gripper actually is, from TF)
-  * cube position (where the cube actually is, from TF/known target)
-  * the gap between them  --> tells you exactly how much to adjust.
+The gripper's actual tool0 position doesn't line up with the belt/tower
+coordinates, so instead of following it we drive the cube along a clean
+scripted path keyed to the robot status. Fully deterministic, no drift:
 
-It also teleports the cube to follow the tool while carried, and releases it
-at the tower slot (same behaviour as before), so the demo still works.
+  PICK        -> cube at belt pick point (0.45,-0.20), grasp height
+  LIFT        -> cube straight up (same XY, high)
+  PLACE_ABOVE -> cube moves over the target tower slot (high)
+  PLACE_AT    -> cube lowers onto the tower slot, release
+
+Cube heights are WORLD frame (pedestal/table tops at 0.40).
 """
-
 import numpy as np
 import rclpy
 from rclpy.node import Node
@@ -19,16 +20,14 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 from ros_gz_interfaces.srv import SetEntityPose
 from ros_gz_interfaces.msg import Entity
-from tf2_ros import Buffer, TransformListener
 
-# tower geometry in WORLD frame (base_link at pedestal top z=0.40)
+# world coordinates
 PICK_XY = (0.45, -0.20)
-TC = (0.45, 0.20); PITCH = 0.10
-Z_BELT = 0.44       # cube center height on the conveyor (world)
-Z_CARRY = 0.72      # carry height (world)
-Z_T0 = 0.44; Z_STEP = 0.08   # tower layer heights (world)
+TC = (0.45, 0.20); PITCH = 0.10          # tower center + pitch
+Z_BELT  = 0.44                            # cube on the belt
+Z_HIGH  = 0.75                            # travel/lift height
+Z_T0    = 0.44; Z_STEP = 0.08            # tower layer base + step
 SET_POSE_SRV = "/world/cell_world/set_pose"
-GRIP_OFFSET_Z = -0.02   # cube sits 2 cm below the tool0 flange (in the grip)
 
 
 def tower_xyz(i):
@@ -40,16 +39,16 @@ def tower_xyz(i):
 class GraspManager(Node):
     def __init__(self):
         super().__init__("grasp_manager")
-        self.active_part = "part"
+        self.active_part = "cube_0"
         self.holding = False
         self.last_status = ""
+        self.target = None          # (x,y,z) the cube should glide toward
+        self.pos = None             # current smoothed cube position
         self.cli = self.create_client(SetEntityPose, SET_POSE_SRV)
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
         self.create_subscription(String, "/cell/active_part", self.on_active, 10)
         self.create_subscription(String, "/cell/robot_status", self.on_status, 10)
-        self.create_timer(0.05, self.follow_tool)   # 20 Hz smooth carry
-        self.get_logger().info("Grasp manager ready (with coordinate readout)")
+        self.create_timer(0.02, self.glide)   # 50 Hz smooth glide
+        self.get_logger().info("Grasp manager ready (scripted path)")
 
     def on_active(self, msg):
         self.active_part = msg.data
@@ -60,63 +59,42 @@ class GraspManager(Node):
         except (ValueError, IndexError):
             return 0
 
-    def tool0(self):
-        """Live tool0 position in world/base_link frame from TF, or None."""
-        for parent in ("world", "base_link"):
-            try:
-                t = self.tf_buffer.lookup_transform(
-                    parent, "tool0", rclpy.time.Time())
-                p = t.transform.translation
-                # base_link is at z=0.40 world; convert if needed
-                z = p.z + (0.40 if parent == "base_link" else 0.0)
-                return np.array([p.x, p.y, z]), parent
-            except Exception:
-                continue
-        return None, None
-
-    def report(self, label, cube_xyz):
-        tp, frame = self.tool0()
-        if tp is None:
-            self.get_logger().warn(f"[{label}] tool0 TF not available yet")
-            return
-        gap = np.array(cube_xyz) - tp
-        self.get_logger().info(
-            f"[{label}] tool0={np.round(tp,3).tolist()} (via {frame}) | "
-            f"cube_target={list(np.round(cube_xyz,3))} | "
-            f"gap(cube-tool)={np.round(gap,3).tolist()}  "
-            f"=> dx={gap[0]*100:+.1f}cm dy={gap[1]*100:+.1f}cm dz={gap[2]*100:+.1f}cm")
-
     def on_status(self, msg):
         s = msg.data
         if s == self.last_status:
             return
         self.last_status = s
         i = self.cube_index()
+        tx, ty, tz = tower_xyz(i)
 
         if s.startswith("PICK"):
             self.holding = True
-            cube = (PICK_XY[0], PICK_XY[1], Z_BELT)
-            self.report("PICK", cube)        # <-- shows grasp alignment
-
+            self.pos = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])  # start on belt
+            self.target = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])
+        elif s.startswith("LIFT") and self.holding:
+            self.target = np.array([PICK_XY[0], PICK_XY[1], Z_HIGH])   # straight up
+        elif s.startswith("PLACE_ABOVE") and self.holding:
+            self.target = np.array([tx, ty, Z_HIGH])                   # over slot
         elif s.startswith("PLACE_AT") and self.holding:
-            x, y, z = tower_xyz(i)
-            self.report("PLACE", (x, y, z))  # <-- shows drop alignment
-            self.holding = False              # stop following FIRST
-            self.move(x, y, z)                # set cube down on the slot
-            self.get_logger().info(f"Released {self.active_part} at cell {i}")
+            self.target = np.array([tx, ty, tz])                       # down onto slot
+        elif s.startswith("PLACE_LIFT"):
+            self.holding = False                                        # released, stays
 
-    def follow_tool(self):
-        """While holding, glue the cube to the live tool0 pose (smooth carry)."""
-        if not self.holding:
+    def glide(self):
+        if not self.holding or self.pos is None or self.target is None:
             return
-        tp, _ = self.tool0()
-        if tp is not None:
-            self.move(tp[0], tp[1], tp[2] + GRIP_OFFSET_Z)
+        # move current position toward target smoothly (rate-limited)
+        step = 0.003   # m per tick (~1 m/s at 50 Hz)
+        d = self.target - self.pos
+        dist = np.linalg.norm(d)
+        if dist > step:
+            self.pos = self.pos + d / dist * step
+        else:
+            self.pos = self.target.copy()
+        self.move(*self.pos)
 
     def move(self, x, y, z):
-        if not self.cli.service_is_ready() and \
-           not self.cli.wait_for_service(timeout_sec=2.0):
-            self.get_logger().warn("set_pose service unavailable")
+        if not self.cli.service_is_ready():
             return
         req = SetEntityPose.Request()
         req.entity = Entity(); req.entity.name = self.active_part

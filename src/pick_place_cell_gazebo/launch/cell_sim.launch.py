@@ -20,8 +20,12 @@ def generate_launch_description():
     world_file = os.path.join(pkg_share, 'worlds', 'cell_world.sdf')
 
     # ---- UR5e robot description (official ur_simulation_gz) -------------
+    #ur_xacro = PathJoinSubstitution(
+        #[FindPackageShare('ur_simulation_gz'), 'urdf', 'ur_gz.urdf.xacro'])
+        
     ur_xacro = PathJoinSubstitution(
-        [FindPackageShare('ur_simulation_gz'), 'urdf', 'ur_gz.urdf.xacro'])
+        [FindPackageShare('pick_place_cell_gazebo'), 'urdf', 'ur5e_with_gripper.urdf.xacro'])
+    
     #ur_controllers = PathJoinSubstitution(
         #[FindPackageShare('ur_simulation_gz'), 'config', 'ur_controllers.yaml'])
     ur_controllers = PathJoinSubstitution(
