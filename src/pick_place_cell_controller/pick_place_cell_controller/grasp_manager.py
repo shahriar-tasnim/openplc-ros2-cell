@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
-grasp_manager.py -- scripted kinematic grasp for the UR5e cell.
+grasp_manager.py -- scripted kinematic grasp with LABEL-BASED SORTING.
 
-The gripper's actual tool0 position doesn't line up with the belt/tower
-coordinates, so instead of following it we drive the cube along a clean
-scripted path keyed to the robot status. Fully deterministic, no drift:
+The parcel is driven along a clean scripted path keyed to the robot status.
+The destination is no longer a fixed tower: it comes from /cell/destination
+(published by the sorter, derived from the parcel's detected label), so each
+parcel lands on pallet A, B, C or in the reject bin.
 
-  PICK        -> cube at belt pick point (0.45,-0.20), grasp height
-  LIFT        -> cube straight up (same XY, high)
-  PLACE_ABOVE -> cube moves over the target tower slot (high)
-  PLACE_AT    -> cube lowers onto the tower slot, release
-
-Cube heights are WORLD frame (pedestal/table tops at 0.40).
+  PICK        -> parcel at the belt pick point
+  LIFT        -> straight up
+  PLACE_ABOVE -> across to the routed pallet, high
+  PLACE_AT    -> down onto its slot, release
 """
 import numpy as np
 import rclpy
@@ -21,76 +20,85 @@ from geometry_msgs.msg import Pose
 from ros_gz_interfaces.srv import SetEntityPose
 from ros_gz_interfaces.msg import Entity
 
-# world coordinates
+from pick_place_cell_controller import sort_destinations as sd
+
 PICK_XY = (0.45, -0.20)
-TC = (0.45, 0.20); PITCH = 0.10          # tower center + pitch
-Z_BELT  = 0.44                            # cube on the belt
-Z_HIGH  = 0.75                            # travel/lift height
-Z_T0    = 0.44; Z_STEP = 0.08            # tower layer base + step
+Z_BELT  = 0.44
+Z_HIGH  = sd.Z_HIGH
 SET_POSE_SRV = "/world/cell_world/set_pose"
-
-
-def tower_xyz(i):
-    L = i // 9; w = i % 9; r = w // 3
-    c = (w % 3) if r % 2 == 0 else (2 - w % 3)
-    return TC[0]+(c-1)*PITCH, TC[1]+(r-1)*PITCH, Z_T0 + L*Z_STEP
 
 
 class GraspManager(Node):
     def __init__(self):
         super().__init__("grasp_manager")
         self.active_part = "cube_0"
+        self.destination = "REJECT"     # latest from the sorter
+        self.cycle_dest = "REJECT"      # frozen for the current parcel
+        self.counts = {"A": 0, "B": 0, "C": 0, "REJECT": 0}
         self.holding = False
         self.last_status = ""
-        self.target = None          # (x,y,z) the cube should glide toward
-        self.pos = None             # current smoothed cube position
+        self.target = None
+        self.pos = None
+
         self.cli = self.create_client(SetEntityPose, SET_POSE_SRV)
         self.create_subscription(String, "/cell/active_part", self.on_active, 10)
+        self.create_subscription(String, "/cell/destination", self.on_dest, 10)
         self.create_subscription(String, "/cell/robot_status", self.on_status, 10)
-        self.create_timer(0.02, self.glide)   # 50 Hz smooth glide
-        self.get_logger().info("Grasp manager ready (scripted path)")
+        self.create_timer(0.02, self.glide)
+        self.get_logger().info("Grasp manager ready (label-based sorting)")
 
     def on_active(self, msg):
         self.active_part = msg.data
 
-    def cube_index(self):
-        try:
-            return int(self.active_part.split("_")[-1]) % 36
-        except (ValueError, IndexError):
-            return 0
+    def on_dest(self, msg):
+        if msg.data in self.counts:
+            self.destination = msg.data
+
+    def slot_for_cycle(self):
+        n = self.counts[self.cycle_dest]
+        return sd.slot(self.cycle_dest, n)
 
     def on_status(self, msg):
         s = msg.data
         if s == self.last_status:
             return
         self.last_status = s
-        i = self.cube_index()
-        tx, ty, tz = tower_xyz(i)
 
         if s.startswith("PICK"):
+            # freeze the destination for this parcel at pick time
+            self.cycle_dest = self.destination
             self.holding = True
-            self.pos = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])  # start on belt
-            self.target = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])
+            self.pos = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])
+            self.target = self.pos.copy()
+            self.get_logger().info(
+                f"{self.active_part} -> pallet {self.cycle_dest}")
+
         elif s.startswith("LIFT") and self.holding:
-            self.target = np.array([PICK_XY[0], PICK_XY[1], Z_HIGH])   # straight up
+            self.target = np.array([PICK_XY[0], PICK_XY[1], Z_HIGH])
+
         elif s.startswith("PLACE_ABOVE") and self.holding:
-            self.target = np.array([tx, ty, Z_HIGH])                   # over slot
+            x, y, _ = self.slot_for_cycle()
+            self.target = np.array([x, y, Z_HIGH])
+
         elif s.startswith("PLACE_AT") and self.holding:
-            self.target = np.array([tx, ty, tz])                       # down onto slot
-        elif s.startswith("PLACE_LIFT"):
-            self.holding = False                                        # released, stays
+            x, y, z = self.slot_for_cycle()
+            self.target = np.array([x, y, z])
+
+        elif s.startswith("PLACE_LIFT") and self.holding:
+            self.holding = False
+            self.counts[self.cycle_dest] += 1     # slot consumed
+            self.get_logger().info(
+                f"Placed on {self.cycle_dest} "
+                f"(A={self.counts['A']} B={self.counts['B']} "
+                f"C={self.counts['C']} R={self.counts['REJECT']})")
 
     def glide(self):
         if not self.holding or self.pos is None or self.target is None:
             return
-        # move current position toward target smoothly (rate-limited)
-        step = 0.003   # m per tick (~1 m/s at 50 Hz)
+        step = 0.003
         d = self.target - self.pos
         dist = np.linalg.norm(d)
-        if dist > step:
-            self.pos = self.pos + d / dist * step
-        else:
-            self.pos = self.target.copy()
+        self.pos = self.pos + d / dist * step if dist > step else self.target.copy()
         self.move(*self.pos)
 
     def move(self, x, y, z):

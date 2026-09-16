@@ -27,6 +27,8 @@ class GazeboRobotNode(Node):
                                  self.robot_reset_callback, 10)
         self.create_subscription(String, '/cell/active_part',
                                  self.active_part_callback, 10)
+        self.create_subscription(String, '/cell/destination',
+                                 self.destination_callback, 10)
 
         self.home_pub = self.create_publisher(Bool, '/cell/robot_home', 10)
         self.busy_pub = self.create_publisher(Bool, '/cell/robot_busy', 10)
@@ -43,6 +45,9 @@ class GazeboRobotNode(Node):
         self.sequence_index = 0
         self.done_until = 0.0
         self.active_index = 0
+        self.destination = 'REJECT'      # latest routing from the sorter
+        self.cycle_dest = 'REJECT'       # frozen for the running cycle
+        self.dest_counts = {'A': 0, 'B': 0, 'C': 0, 'REJECT': 0}
         self.sequence = []
 
         self.joint_names = bp.JOINT_NAMES
@@ -58,9 +63,19 @@ class GazeboRobotNode(Node):
         except (ValueError, IndexError):
             self.active_index = 0
 
+    def destination_callback(self, msg):
+        if msg.data in self.dest_counts:
+            self.destination = msg.data
+
     def build_sequence(self, cube_index):
-        """PRE_PICK, PICK, LIFT, PLACE_ABOVE, PLACE_AT, PLACE_LIFT, HOME."""
-        poses = bp.POSES[cube_index % bp.NUM_CUBES]
+        """PRE_PICK, PICK, LIFT, PLACE_ABOVE, PLACE_AT, PLACE_LIFT, HOME.
+
+        The place waypoints are chosen from the baked pose table according to
+        the routed destination, so the arm swings toward the correct pallet.
+        """
+        base = {'A': 0, 'B': 12, 'C': 24, 'REJECT': 33}.get(self.cycle_dest, 0)
+        idx = (base + self.dest_counts[self.cycle_dest]) % bp.NUM_CUBES
+        poses = bp.POSES[idx]
         # generous durations; first move (from HOME) gets the most time
         durations = [3.0, 2.0, 2.0, 3.0, 2.0, 2.0]
         seq = [(bp.WAYPOINT_NAMES[k], poses[k], durations[k]) for k in range(6)]
@@ -83,6 +98,7 @@ class GazeboRobotNode(Node):
             self.set_fault('joint_trajectory_controller action server unavailable')
             return
 
+        self.cycle_dest = self.destination          # latch for this parcel
         self.sequence = self.build_sequence(self.active_index)
         self.sequence_running = True
         self.sequence_index = 0
@@ -91,7 +107,8 @@ class GazeboRobotNode(Node):
         self.robot_done = False
         self.publish_status('BUSY')
         self.get_logger().info(
-            f'Starting cycle -> tower cube index {self.active_index}')
+            f'Starting cycle -> destination {self.cycle_dest} '
+            f'(parcel index {self.active_index})')
         self.send_current_pose()
 
     def send_current_pose(self):
@@ -137,6 +154,7 @@ class GazeboRobotNode(Node):
         self.send_current_pose()
 
     def complete_sequence(self):
+        self.dest_counts[self.cycle_dest] += 1
         self.sequence_running = False
         self.robot_busy = False
         self.robot_home = True

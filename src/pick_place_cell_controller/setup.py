@@ -39,6 +39,7 @@ setup(
             'part_spawner = pick_place_cell_controller.part_spawner:main',
             'gripper_follower = pick_place_cell_controller.gripper_follower:main',
             'label_detector = pick_place_cell_controller.label_detector:main',
+            'sorter = pick_place_cell_controller.sorter:main',
         ],
     },
 )
