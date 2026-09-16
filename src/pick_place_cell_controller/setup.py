@@ -20,6 +20,7 @@ setup(
         ),
         (os.path.join('lib', 'python3.12', 'site-packages', 'pick_place_cell_controller'),
         glob('pick_place_cell_controller/*.urdf')),
+        (os.path.join('share', package_name, 'models'), glob('models/**/*', recursive=True)),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -37,6 +38,7 @@ setup(
             'grasp_manager = pick_place_cell_controller.grasp_manager:main',
             'part_spawner = pick_place_cell_controller.part_spawner:main',
             'gripper_follower = pick_place_cell_controller.gripper_follower:main',
+            'label_detector = pick_place_cell_controller.label_detector:main',
         ],
     },
 )

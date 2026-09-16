@@ -78,6 +78,7 @@ def generate_launch_description():
         arguments=[
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/world/cell_world/set_pose@ros_gz_interfaces/srv/SetEntityPose',
+            '/cell/camera/image@sensor_msgs/msg/Image[gz.msgs.Image',
         ],
         output='screen',
     )

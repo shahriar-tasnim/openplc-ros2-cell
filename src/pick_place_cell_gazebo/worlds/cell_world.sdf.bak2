@@ -204,7 +204,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_0.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_0.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -228,7 +228,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_1.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_1.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -252,7 +252,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_2.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_2.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -276,7 +276,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_3.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_3.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -300,7 +300,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_4.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_4.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -324,7 +324,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_5.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_5.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -348,7 +348,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_6.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_6.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -372,7 +372,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_7.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_7.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -396,7 +396,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_8.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_8.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -420,7 +420,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_9.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_9.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -444,7 +444,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_10.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_10.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -468,7 +468,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_11.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_11.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -492,7 +492,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_12.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_12.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -516,7 +516,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_13.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_13.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -540,7 +540,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_14.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_14.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -564,7 +564,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_15.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_15.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -588,7 +588,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_16.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_16.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -612,7 +612,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_17.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_17.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -636,7 +636,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_18.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_18.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -660,7 +660,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_19.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_19.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -684,7 +684,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_20.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_20.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -708,7 +708,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_21.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_21.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -732,7 +732,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_22.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_22.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -756,7 +756,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_23.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_23.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -780,7 +780,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_24.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_24.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -804,7 +804,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_25.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_25.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -828,7 +828,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_26.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_26.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -852,7 +852,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_27.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_27.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -876,7 +876,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_28.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_28.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -900,7 +900,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_29.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_29.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -924,7 +924,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_30.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_30.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -948,7 +948,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_31.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_31.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -972,7 +972,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_32.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_32.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -996,7 +996,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_33.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_33.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -1020,7 +1020,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_34.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_34.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
@@ -1044,7 +1044,7 @@
           <material>
             <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
             <pbr><metal>
-              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_35.png</albedo_map>
+              <albedo_map>model://parcel_labels/materials/textures/label_35.png</albedo_map>
               <metalness>0.0</metalness><roughness>1.0</roughness>
             </metal></pbr>
           </material>
