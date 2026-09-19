@@ -1,30 +1,34 @@
 """
-sort_destinations.py -- pallet geometry for the sorting cell (world frame).
+sort_destinations.py -- drop-station geometry for the sorting cell (world frame).
 
-Three pallets plus a reject bin. Each pallet holds parcels in a 2x2 grid,
-stacking upward once a layer is full. The reject bin is a single drop point.
-All positions are reach-verified for the UR5e at the origin.
+Four separated, colour-coded stations around the UR5e's reach arc:
+    A  green   ( 0.58,  0.12)
+    B  blue    ( 0.33,  0.45)
+    C  orange  ( 0.00,  0.52)
+    REJECT red (-0.30,  0.40)
+
+Station tables: top visual centred at z=0.37, 0.03 thick -> surface at 0.385.
+A parcel (0.08 cube) resting on that surface has its centre at 0.425.
 """
 
-# pallet centres (world x, y) -- reach-verified
 CENTRES = {
-    "A":      (0.45, 0.20),
-    "B":      (0.30, 0.38),
-    "C":      (0.48, 0.05),
-    "REJECT": (0.10, 0.47),
+    "A":      ( 0.58,  0.12),
+    "B":      ( 0.33,  0.45),
+    "C":      ( 0.00,  0.52),
+    "REJECT": (-0.30,  0.40),
 }
 
-PITCH   = 0.09    # spacing between slots in a pallet layer
-Z_TOP   = 0.44    # parcel resting height on a pallet (world)
-Z_STEP  = 0.08    # parcel height -> next layer up
-Z_HIGH  = 0.75    # travel height above everything
+PITCH  = 0.09     # spacing between slots within a layer
+Z_TOP  = 0.425    # parcel centre when resting on a station top
+Z_STEP = 0.08     # parcel height -> next layer up
+Z_HIGH = 0.72     # travel height above everything
 
 
 def slot(dest, n):
-    """Where the n-th parcel sent to `dest` should land (world x, y, z).
+    """World (x, y, z) for the n-th parcel routed to `dest`.
 
-    Pallets fill a 2x2 footprint then stack upward. REJECT simply piles
-    parcels at one point, rising each time.
+    Stations fill a 2x2 footprint then stack upward. REJECT piles at one
+    point, rising each time.
     """
     cx, cy = CENTRES.get(dest, CENTRES["REJECT"])
     if dest == "REJECT":

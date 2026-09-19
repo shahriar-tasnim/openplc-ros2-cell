@@ -9,7 +9,16 @@ from std_msgs.msg import Bool, String
 from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
 
-from pick_place_cell_controller import baked_poses as bp
+from pick_place_cell_controller import station_poses as sp
+
+# lean 4-move cycle: down to the parcel, lift, straight to the station, back
+# to the pick approach ready for the next parcel. No HOME, no PLACE_ABOVE.
+MOVE_TIME = {
+    'PICK':       1.0,
+    'LIFT':       0.8,
+    'PLACE_AT':   1.6,
+    'PRE_PICK':   1.4,
+}
 
 
 class GazeboRobotNode(Node):
@@ -25,8 +34,6 @@ class GazeboRobotNode(Node):
                                  self.robot_start_callback, 10)
         self.create_subscription(Bool, '/cell/robot_reset',
                                  self.robot_reset_callback, 10)
-        self.create_subscription(String, '/cell/active_part',
-                                 self.active_part_callback, 10)
         self.create_subscription(String, '/cell/destination',
                                  self.destination_callback, 10)
 
@@ -44,43 +51,30 @@ class GazeboRobotNode(Node):
         self.sequence_running = False
         self.sequence_index = 0
         self.done_until = 0.0
-        self.active_index = 0
+
         self.destination = 'REJECT'      # latest routing from the sorter
         self.cycle_dest = 'REJECT'       # frozen for the running cycle
-        self.dest_counts = {'A': 0, 'B': 0, 'C': 0, 'REJECT': 0}
         self.sequence = []
 
-        self.joint_names = bp.JOINT_NAMES
+        self.joint_names = sp.JOINT_NAMES
 
         self.create_timer(0.1, self.publish_feedback)
         self.publish_status('IDLE')
-        self.get_logger().info(
-            'UR5e robot initialized | state=IDLE home=1 busy=0 done=0 fault=0')
-
-    def active_part_callback(self, msg):
-        try:
-            self.active_index = int(msg.data.split('_')[-1]) % bp.NUM_CUBES
-        except (ValueError, IndexError):
-            self.active_index = 0
+        self.get_logger().info('UR5e robot ready | 4-move sorting cycle')
 
     def destination_callback(self, msg):
-        if msg.data in self.dest_counts:
+        if msg.data in sp.PLACE:
             self.destination = msg.data
 
-    def build_sequence(self, cube_index):
-        """PRE_PICK, PICK, LIFT, PLACE_ABOVE, PLACE_AT, PLACE_LIFT, HOME.
-
-        The place waypoints are chosen from the baked pose table according to
-        the routed destination, so the arm swings toward the correct pallet.
-        """
-        base = {'A': 0, 'B': 12, 'C': 24, 'REJECT': 33}.get(self.cycle_dest, 0)
-        idx = (base + self.dest_counts[self.cycle_dest]) % bp.NUM_CUBES
-        poses = bp.POSES[idx]
-        # generous durations; first move (from HOME) gets the most time
-        durations = [3.0, 2.0, 2.0, 3.0, 2.0, 2.0]
-        seq = [(bp.WAYPOINT_NAMES[k], poses[k], durations[k]) for k in range(6)]
-        seq.append(('HOME', bp.HOME, 3.0))
-        return seq
+    def build_sequence(self):
+        """PICK -> LIFT -> PLACE_AT(station) -> PRE_PICK (ready for next)."""
+        place = sp.PLACE.get(self.cycle_dest, sp.PLACE['REJECT'])
+        return [
+            ('PICK',     sp.PICK,     MOVE_TIME['PICK']),
+            ('LIFT',     sp.LIFT,     MOVE_TIME['LIFT']),
+            ('PLACE_AT', place,       MOVE_TIME['PLACE_AT']),
+            ('PRE_PICK', sp.PRE_PICK, MOVE_TIME['PRE_PICK']),
+        ]
 
     def robot_start_callback(self, msg):
         rising_edge = msg.data and not self.previous_robot_start
@@ -93,22 +87,19 @@ class GazeboRobotNode(Node):
         if self.robot_fault:
             self.get_logger().warn('RobotStart ignored: robot is faulted')
             return
-        self.get_logger().info('RobotStart received from PLC')
         if not self.trajectory_client.wait_for_server(timeout_sec=2.0):
-            self.set_fault('joint_trajectory_controller action server unavailable')
+            self.set_fault('joint_trajectory_controller unavailable')
             return
 
         self.cycle_dest = self.destination          # latch for this parcel
-        self.sequence = self.build_sequence(self.active_index)
+        self.sequence = self.build_sequence()
         self.sequence_running = True
         self.sequence_index = 0
         self.robot_busy = True
         self.robot_home = False
         self.robot_done = False
         self.publish_status('BUSY')
-        self.get_logger().info(
-            f'Starting cycle -> destination {self.cycle_dest} '
-            f'(parcel index {self.active_index})')
+        self.get_logger().info(f'Cycle start -> station {self.cycle_dest}')
         self.send_current_pose()
 
     def send_current_pose(self):
@@ -117,7 +108,6 @@ class GazeboRobotNode(Node):
             return
         pose_name, positions, duration = self.sequence[self.sequence_index]
         self.publish_status(pose_name)
-        self.get_logger().info(f'Moving to {pose_name}')
         goal = FollowJointTrajectory.Goal()
         goal.trajectory.joint_names = self.joint_names
         point = JointTrajectoryPoint()
@@ -146,23 +136,20 @@ class GazeboRobotNode(Node):
             self.set_fault(f'Trajectory execution failed: {exc}')
             return
         if result.error_code != 0:
-            self.set_fault(f'Trajectory controller error {result.error_code}: '
+            self.set_fault(f'Controller error {result.error_code}: '
                            f'{result.error_string}')
             return
-        self.get_logger().info(f'{self.sequence[self.sequence_index][0]} reached')
         self.sequence_index += 1
         self.send_current_pose()
 
     def complete_sequence(self):
-        self.dest_counts[self.cycle_dest] += 1
         self.sequence_running = False
         self.robot_busy = False
         self.robot_home = True
         self.robot_done = True
-        self.done_until = time.monotonic() + 1.0
+        self.done_until = time.monotonic() + 0.4
         self.publish_status('DONE')
-        self.get_logger().info(
-            'Pick-and-place completed | state=DONE home=1 busy=0 done=1 fault=0')
+        self.get_logger().info(f'Cycle complete ({self.cycle_dest})')
 
     def robot_reset_callback(self, msg):
         if not msg.data or self.sequence_running:

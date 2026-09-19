@@ -21,7 +21,7 @@ class ConveyorNode(Node):
         self.feed_y = -0.85
         self.pick_y = -0.20
         self.part_z = 0.44
-        self.speed = 0.20
+        self.speed = 0.50
         self.dt = 0.05
         self.current_y = self.feed_y
         self.part_name = 'cube_0'

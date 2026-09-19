@@ -44,4 +44,8 @@ def generate_launch_description():
         TimerAction(period=9.0,  actions=[ctrl('conveyor')]),
         TimerAction(period=10.0, actions=[ctrl('grasp_manager')]),
         TimerAction(period=12.0, actions=[ctrl('part_spawner')]),
+        TimerAction(period=11.0, actions=[ctrl('label_detector')]),
+        TimerAction(period=12.0, actions=[ctrl('sorter')]),
+        TimerAction(period=13.0, actions=[ctrl('part_spawner')]),
+        
     ])

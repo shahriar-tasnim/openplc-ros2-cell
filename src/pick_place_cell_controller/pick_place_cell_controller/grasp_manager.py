@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-grasp_manager.py -- scripted kinematic grasp with LABEL-BASED SORTING.
+grasp_manager.py -- duration-matched kinematic grasp with label sorting.
 
-The parcel is driven along a clean scripted path keyed to the robot status.
-The destination is no longer a fixed tower: it comes from /cell/destination
-(published by the sorter, derived from the parcel's detected label), so each
-parcel lands on pallet A, B, C or in the reject bin.
+The parcel follows a scripted path (reliable, no TF tracking), but instead of
+gliding at a fixed speed it interpolates from its current position to the
+target over EXACTLY the time the arm is given for that move. Both therefore
+start and finish together, whatever the distance.
 
-  PICK        -> parcel at the belt pick point
-  LIFT        -> straight up
-  PLACE_ABOVE -> across to the routed pallet, high
-  PLACE_AT    -> down onto its slot, release
+Move durations must match MOVE_TIME in gazebo_robot_node.py.
+
+  PICK      -> parcel at the belt, destination frozen
+  LIFT      -> rises to travel height in step with the arm
+  PLACE_AT  -> crosses to its slot and settles, in step with the arm
+  PRE_PICK  -> released; arm returns for the next parcel
 """
 import numpy as np
 import rclpy
@@ -23,8 +25,15 @@ from ros_gz_interfaces.msg import Entity
 from pick_place_cell_controller import sort_destinations as sd
 
 PICK_XY = (0.45, -0.20)
-Z_BELT  = 0.44
-Z_HIGH  = sd.Z_HIGH
+Z_BELT = 0.44
+Z_HIGH = sd.Z_HIGH
+TICK = 0.02                      # 50 Hz update
+
+# how long the ARM takes for each move -- keep in step with the robot node
+MOVE_TIME = {
+    "LIFT":     0.8,
+    "PLACE_AT": 1.6,
+}
 SET_POSE_SRV = "/world/cell_world/set_pose"
 
 
@@ -32,20 +41,25 @@ class GraspManager(Node):
     def __init__(self):
         super().__init__("grasp_manager")
         self.active_part = "cube_0"
-        self.destination = "REJECT"     # latest from the sorter
-        self.cycle_dest = "REJECT"      # frozen for the current parcel
+        self.destination = "REJECT"
+        self.cycle_dest = "REJECT"
         self.counts = {"A": 0, "B": 0, "C": 0, "REJECT": 0}
         self.holding = False
-        self.last_status = ""
-        self.target = None
-        self.pos = None
+        self.last_status = None
+        self.pos = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])
+
+        # interpolation state
+        self.start = None            # where the move began
+        self.target = None           # where it should end
+        self.elapsed = 0.0
+        self.duration = 1.0
 
         self.cli = self.create_client(SetEntityPose, SET_POSE_SRV)
         self.create_subscription(String, "/cell/active_part", self.on_active, 10)
         self.create_subscription(String, "/cell/destination", self.on_dest, 10)
         self.create_subscription(String, "/cell/robot_status", self.on_status, 10)
-        self.create_timer(0.02, self.glide)
-        self.get_logger().info("Grasp manager ready (label-based sorting)")
+        self.create_timer(TICK, self.update)
+        self.get_logger().info("Grasp manager ready (duration-matched)")
 
     def on_active(self, msg):
         self.active_part = msg.data
@@ -55,60 +69,72 @@ class GraspManager(Node):
             self.destination = msg.data
 
     def slot_for_cycle(self):
-        n = self.counts[self.cycle_dest]
-        return sd.slot(self.cycle_dest, n)
+        return sd.slot(self.cycle_dest, self.counts[self.cycle_dest])
+
+    def begin_move(self, target, duration):
+        """Interpolate from the current position to `target` over `duration`."""
+        self.start = self.pos.copy()
+        self.target = np.asarray(target, dtype=float)
+        self.duration = max(duration, TICK)
+        self.elapsed = 0.0
 
     def on_status(self, msg):
         s = msg.data
-        if s == self.last_status:
+        if s == getattr(self, "last_status", None):
             return
         self.last_status = s
 
         if s.startswith("PICK"):
-            # freeze the destination for this parcel at pick time
             self.cycle_dest = self.destination
             self.holding = True
             self.pos = np.array([PICK_XY[0], PICK_XY[1], Z_BELT])
+            self.start = self.pos.copy()
             self.target = self.pos.copy()
+            self.elapsed = 0.0
+            self.duration = 1.0
             self.get_logger().info(
-                f"{self.active_part} -> pallet {self.cycle_dest}")
+                f"{self.active_part} -> station {self.cycle_dest}")
 
         elif s.startswith("LIFT") and self.holding:
-            self.target = np.array([PICK_XY[0], PICK_XY[1], Z_HIGH])
-
-        elif s.startswith("PLACE_ABOVE") and self.holding:
-            x, y, _ = self.slot_for_cycle()
-            self.target = np.array([x, y, Z_HIGH])
+            self.begin_move([PICK_XY[0], PICK_XY[1], Z_HIGH],
+                            MOVE_TIME["LIFT"])
 
         elif s.startswith("PLACE_AT") and self.holding:
             x, y, z = self.slot_for_cycle()
-            self.target = np.array([x, y, z])
+            self.begin_move([x, y, z], MOVE_TIME["PLACE_AT"])
 
-        elif s.startswith("PLACE_LIFT") and self.holding:
+        elif s.startswith("PRE_PICK") and self.holding:
+            x, y, z = self.slot_for_cycle()
+            self.pos = np.array([x, y, z])
+            self.move(x, y, z)
             self.holding = False
-            self.counts[self.cycle_dest] += 1     # slot consumed
+            self.counts[self.cycle_dest] += 1
             self.get_logger().info(
-                f"Placed on {self.cycle_dest} "
-                f"(A={self.counts['A']} B={self.counts['B']} "
-                f"C={self.counts['C']} R={self.counts['REJECT']})")
+                f"Placed on {self.cycle_dest} at ({x:.2f}, {y:.2f}, {z:.2f}) | "
+                f"A={self.counts['A']} B={self.counts['B']} "
+                f"C={self.counts['C']} R={self.counts['REJECT']}")
 
-    def glide(self):
-        if not self.holding or self.pos is None or self.target is None:
+    def update(self):
+        if not self.holding or self.start is None or self.target is None:
             return
-        step = 0.003
-        d = self.target - self.pos
-        dist = np.linalg.norm(d)
-        self.pos = self.pos + d / dist * step if dist > step else self.target.copy()
+        self.elapsed += TICK
+        t = min(self.elapsed / self.duration, 1.0)
+        # smoothstep easing so it accelerates and decelerates like the arm
+        e = t * t * (3.0 - 2.0 * t)
+        self.pos = self.start + (self.target - self.start) * e
         self.move(*self.pos)
 
     def move(self, x, y, z):
         if not self.cli.service_is_ready():
             return
         req = SetEntityPose.Request()
-        req.entity = Entity(); req.entity.name = self.active_part
+        req.entity = Entity()
+        req.entity.name = self.active_part
         req.entity.type = Entity.MODEL
         p = Pose()
-        p.position.x = float(x); p.position.y = float(y); p.position.z = float(z)
+        p.position.x = float(x)
+        p.position.y = float(y)
+        p.position.z = float(z)
         p.orientation.w = 1.0
         req.pose = p
         self.cli.call_async(req)

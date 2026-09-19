@@ -122,6 +122,15 @@
     </model>
 
     <!-- TOWER TABLE: 0.40 m table under the stacking area (0.45, 0.20) -->
+    <model name="tower_table">
+      <static>true</static>
+      <pose>0.45 0.20 0.20 0 0 0</pose>   <!-- top at 0.40 -->
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.45 0.45 0.40</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.45 0.45 0.40</size></box></geometry>
+          <material><diffuse>0.35 0.30 0.22 1</diffuse></material></visual>
+      </link>
+    </model>
 
     <!-- initial single part (for the arm-motion / grasp test before the
          spawner is added). Sits on the conveyor at the pick point. -->
@@ -157,6 +166,26 @@
       <static>false</static>
     </model>
 
+    <model name="label_camera">
+      <static>true</static>
+      <pose>0.45 -0.20 1.30 0 1.5708 0</pose>
+      <link name="link">
+        <visual name="body">
+          <geometry><box><size>0.06 0.06 0.04</size></box></geometry>
+          <material><diffuse>0.1 0.1 0.1 1</diffuse></material>
+        </visual>
+        <sensor name="cam" type="camera">
+          <camera>
+            <horizontal_fov>1.0</horizontal_fov>
+            <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+            <clip><near>0.1</near><far>5.0</far></clip>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>15</update_rate>
+          <topic>/cell/camera/image</topic>
+        </sensor>
+      </link>
+    </model>
     
     <model name="cube_0">
       <pose>2.0 -1.6 0.04 0 0 0</pose>
@@ -239,7 +268,18 @@
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
         <visual name="body">
           <geometry><box><size>0.08 0.08 0.08</size></box></geometry>
-          <material><diffuse>0.55 0.55 0.55 1</diffuse></material>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material>
+        </visual>
+        <visual name="label">
+          <pose>0 0 0.0405 0 0 0</pose>
+          <geometry><box><size>0.062 0.062 0.001</size></box></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
+            <pbr><metal>
+              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_3.png</albedo_map>
+              <metalness>0.0</metalness><roughness>1.0</roughness>
+            </metal></pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -372,7 +412,18 @@
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
         <visual name="body">
           <geometry><box><size>0.08 0.08 0.08</size></box></geometry>
-          <material><diffuse>0.55 0.55 0.55 1</diffuse></material>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material>
+        </visual>
+        <visual name="label">
+          <pose>0 0 0.0405 0 0 0</pose>
+          <geometry><box><size>0.062 0.062 0.001</size></box></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
+            <pbr><metal>
+              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_9.png</albedo_map>
+              <metalness>0.0</metalness><roughness>1.0</roughness>
+            </metal></pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -553,7 +604,18 @@
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
         <visual name="body">
           <geometry><box><size>0.08 0.08 0.08</size></box></geometry>
-          <material><diffuse>0.55 0.55 0.55 1</diffuse></material>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material>
+        </visual>
+        <visual name="label">
+          <pose>0 0 0.0405 0 0 0</pose>
+          <geometry><box><size>0.062 0.062 0.001</size></box></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
+            <pbr><metal>
+              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_17.png</albedo_map>
+              <metalness>0.0</metalness><roughness>1.0</roughness>
+            </metal></pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -662,7 +724,18 @@
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
         <visual name="body">
           <geometry><box><size>0.08 0.08 0.08</size></box></geometry>
-          <material><diffuse>0.55 0.55 0.55 1</diffuse></material>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material>
+        </visual>
+        <visual name="label">
+          <pose>0 0 0.0405 0 0 0</pose>
+          <geometry><box><size>0.062 0.062 0.001</size></box></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
+            <pbr><metal>
+              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_22.png</albedo_map>
+              <metalness>0.0</metalness><roughness>1.0</roughness>
+            </metal></pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -795,7 +868,18 @@
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
         <visual name="body">
           <geometry><box><size>0.08 0.08 0.08</size></box></geometry>
-          <material><diffuse>0.55 0.55 0.55 1</diffuse></material>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material>
+        </visual>
+        <visual name="label">
+          <pose>0 0 0.0405 0 0 0</pose>
+          <geometry><box><size>0.062 0.062 0.001</size></box></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
+            <pbr><metal>
+              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_28.png</albedo_map>
+              <metalness>0.0</metalness><roughness>1.0</roughness>
+            </metal></pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -928,7 +1012,18 @@
                    <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
         <visual name="body">
           <geometry><box><size>0.08 0.08 0.08</size></box></geometry>
-          <material><diffuse>0.55 0.55 0.55 1</diffuse></material>
+          <material><diffuse>0.85 0.35 0.1 1</diffuse></material>
+        </visual>
+        <visual name="label">
+          <pose>0 0 0.0405 0 0 0</pose>
+          <geometry><box><size>0.062 0.062 0.001</size></box></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse>
+            <pbr><metal>
+              <albedo_map>/home/cxt13/openplc_ros2_cell_ws/src/pick_place_cell_gazebo/models/parcel_labels/materials/textures/label_34.png</albedo_map>
+              <metalness>0.0</metalness><roughness>1.0</roughness>
+            </metal></pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -954,176 +1049,6 @@
             </metal></pbr>
           </material>
         </visual>
-      </link>
-    </model>
-    <model name="pallet_A">
-      <static>true</static>
-      <pose>0.58 0.12 0 0 0 0</pose>
-      <link name="link">
-        <collision name="c">
-          <pose>0 0 0.18 0 0 0</pose>
-          <geometry><box><size>0.26 0.26 0.36</size></box></geometry>
-        </collision>
-        <visual name="body">
-          <pose>0 0 0.17 0 0 0</pose>
-          <geometry><box><size>0.24 0.24 0.34</size></box></geometry>
-          <material><diffuse>0.35 0.35 0.38 1</diffuse></material>
-        </visual>
-        <visual name="top">
-          <pose>0 0 0.37 0 0 0</pose>
-          <geometry><box><size>0.28 0.28 0.03</size></box></geometry>
-          <material><diffuse>0.15 0.65 0.25 1</diffuse>
-            <ambient>0.15 0.65 0.25 1</ambient></material>
-        </visual>
-      </link>
-    </model>
-    <model name="pallet_B">
-      <static>true</static>
-      <pose>0.33 0.45 0 0 0 0</pose>
-      <link name="link">
-        <collision name="c">
-          <pose>0 0 0.18 0 0 0</pose>
-          <geometry><box><size>0.26 0.26 0.36</size></box></geometry>
-        </collision>
-        <visual name="body">
-          <pose>0 0 0.17 0 0 0</pose>
-          <geometry><box><size>0.24 0.24 0.34</size></box></geometry>
-          <material><diffuse>0.35 0.35 0.38 1</diffuse></material>
-        </visual>
-        <visual name="top">
-          <pose>0 0 0.37 0 0 0</pose>
-          <geometry><box><size>0.28 0.28 0.03</size></box></geometry>
-          <material><diffuse>0.15 0.35 0.80 1</diffuse>
-            <ambient>0.15 0.35 0.80 1</ambient></material>
-        </visual>
-      </link>
-    </model>
-    <model name="pallet_C">
-      <static>true</static>
-      <pose>0.0 0.52 0 0 0 0</pose>
-      <link name="link">
-        <collision name="c">
-          <pose>0 0 0.18 0 0 0</pose>
-          <geometry><box><size>0.26 0.26 0.36</size></box></geometry>
-        </collision>
-        <visual name="body">
-          <pose>0 0 0.17 0 0 0</pose>
-          <geometry><box><size>0.24 0.24 0.34</size></box></geometry>
-          <material><diffuse>0.35 0.35 0.38 1</diffuse></material>
-        </visual>
-        <visual name="top">
-          <pose>0 0 0.37 0 0 0</pose>
-          <geometry><box><size>0.28 0.28 0.03</size></box></geometry>
-          <material><diffuse>0.95 0.55 0.10 1</diffuse>
-            <ambient>0.95 0.55 0.10 1</ambient></material>
-        </visual>
-      </link>
-    </model>
-    <model name="reject_bin">
-      <static>true</static>
-      <pose>-0.3 0.4 0 0 0 0</pose>
-      <link name="link">
-        <collision name="c">
-          <pose>0 0 0.18 0 0 0</pose>
-          <geometry><box><size>0.26 0.26 0.36</size></box></geometry>
-        </collision>
-        <visual name="body">
-          <pose>0 0 0.17 0 0 0</pose>
-          <geometry><box><size>0.24 0.24 0.34</size></box></geometry>
-          <material><diffuse>0.35 0.35 0.38 1</diffuse></material>
-        </visual>
-        <visual name="top">
-          <pose>0 0 0.37 0 0 0</pose>
-          <geometry><box><size>0.28 0.28 0.03</size></box></geometry>
-          <material><diffuse>0.75 0.12 0.12 1</diffuse>
-            <ambient>0.75 0.12 0.12 1</ambient></material>
-        </visual>
-      </link>
-    </model>
-    <!-- Camera stand: base, post, boom reaching over the pick station -->
-    <model name="camera_stand">
-      <static>true</static>
-      <pose>0.95 -0.2 0 0 0 0</pose>
-      <link name="link">
-        <visual name="base">
-          <pose>0 0 0.02 0 0 0</pose>
-          <geometry><cylinder><radius>0.10</radius><length>0.04</length></cylinder></geometry>
-          <material><diffuse>0.22 0.22 0.25 1</diffuse></material>
-        </visual>
-        <visual name="post">
-          <pose>0 0 0.500 0 0 0</pose>
-          <geometry><cylinder><radius>0.024</radius><length>1.000</length></cylinder></geometry>
-          <material><diffuse>0.45 0.45 0.48 1</diffuse></material>
-        </visual>
-        <visual name="boom">
-          <pose>-0.250 0 1.000 0 1.5708 0</pose>
-          <geometry><cylinder><radius>0.020</radius><length>0.500</length></cylinder></geometry>
-          <material><diffuse>0.45 0.45 0.48 1</diffuse></material>
-        </visual>
-        <visual name="gusset">
-          <pose>-0.06 0 0.940 0 0.7854 0</pose>
-          <geometry><box><size>0.14 0.02 0.02</size></box></geometry>
-          <material><diffuse>0.40 0.40 0.43 1</diffuse></material>
-        </visual>
-        <collision name="c">
-          <pose>0 0 0.500 0 0 0</pose>
-          <geometry><cylinder><radius>0.03</radius><length>1.000</length></cylinder></geometry>
-        </collision>
-      </link>
-    </model>
-    <!-- Eye-to-hand camera: body, lens barrel, hood, mounting bracket -->
-    <model name="label_camera">
-      <static>true</static>
-      <pose>0.45 -0.2 1.0 0 1.5708 0</pose>
-      <link name="link">
-        <!-- bracket joining the camera up to the boom (boom is at world +X) -->
-        <visual name="bracket">
-          <pose>-0.045 0 0.055 0 0 0</pose>
-          <geometry><box><size>0.03 0.04 0.09</size></box></geometry>
-          <material><diffuse>0.35 0.35 0.38 1</diffuse></material>
-        </visual>
-        <!-- main body -->
-        <visual name="body">
-          <pose>-0.02 0 0 0 0 0</pose>
-          <geometry><box><size>0.09 0.065 0.065</size></box></geometry>
-          <material><diffuse>0.10 0.10 0.12 1</diffuse></material>
-        </visual>
-        <!-- lens barrel pointing along local +X (world -Z = down) -->
-        <visual name="lens_barrel">
-          <pose>0.035 0 0 0 1.5708 0</pose>
-          <geometry><cylinder><radius>0.022</radius><length>0.045</length></cylinder></geometry>
-          <material><diffuse>0.16 0.16 0.18 1</diffuse></material>
-        </visual>
-        <!-- glass element -->
-        <visual name="lens_glass">
-          <pose>0.059 0 0 0 1.5708 0</pose>
-          <geometry><cylinder><radius>0.016</radius><length>0.004</length></cylinder></geometry>
-          <material><diffuse>0.05 0.10 0.30 1</diffuse>
-            <specular>0.8 0.9 1.0 1</specular></material>
-        </visual>
-        <!-- lens hood -->
-        <visual name="hood">
-          <pose>0.068 0 0 0 1.5708 0</pose>
-          <geometry><cylinder><radius>0.027</radius><length>0.012</length></cylinder></geometry>
-          <material><diffuse>0.08 0.08 0.09 1</diffuse></material>
-        </visual>
-        <!-- small status LED -->
-        <visual name="led">
-          <pose>-0.02 0.028 0.028 0 0 0</pose>
-          <geometry><sphere><radius>0.005</radius></sphere></geometry>
-          <material><diffuse>0.1 0.9 0.2 1</diffuse>
-            <emissive>0.1 0.9 0.2 1</emissive></material>
-        </visual>
-        <sensor name="cam" type="camera">
-          <camera>
-            <horizontal_fov>1.1</horizontal_fov>
-            <image><width>640</width><height>480</height><format>R8G8B8</format></image>
-            <clip><near>0.1</near><far>5.0</far></clip>
-          </camera>
-          <always_on>1</always_on>
-          <update_rate>15</update_rate>
-          <topic>/cell/camera/image</topic>
-        </sensor>
       </link>
     </model>
   </world>
