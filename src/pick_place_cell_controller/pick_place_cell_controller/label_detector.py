@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-label_detector.py -- parcel label detection for the sorting cell.
+label_detector.py -- detect the ArUco label nearest the pick point.
 
-Subscribes to the overhead camera, detects the ArUco marker (the parcel's
-shipping label), and publishes the label ID plus its image position on
-/cell/detected_label.
+The overhead camera can see several labels at once.  OpenCV does not promise
+that ids[0] is the parcel at the pick station, so choosing the first detection
+can route the wrong parcel.  This node evaluates every visible marker and
+publishes only the marker nearest the image centre (the calibrated pick area).
 """
 import rclpy
 from rclpy.node import Node
@@ -15,6 +16,7 @@ import cv2
 
 CAMERA_TOPIC = "/cell/camera/image"
 DETECT_TOPIC = "/cell/detected_label"
+PICK_PX, PICK_PY = 320.0, 240.0
 
 
 class LabelDetector(Node):
@@ -49,16 +51,25 @@ class LabelDetector(Node):
         corners, ids, _ = self.detector.detectMarkers(gray)
         if ids is None:
             return
+
+        best = None
         for mc, mid in zip(corners, ids.flatten()):
             c = mc[0]
             cx, cy = float(c[:, 0].mean()), float(c[:, 1].mean())
-            out = String()
-            out.data = f"label={int(mid)} px={cx:.0f} py={cy:.0f}"
-            self.pub.publish(out)
-            if mid != self.last_id:
-                self.get_logger().info(f"Detected {out.data}")
-                self.last_id = int(mid)
-            break
+            d2 = (cx - PICK_PX) ** 2 + (cy - PICK_PY) ** 2
+            if best is None or d2 < best[0]:
+                best = (d2, int(mid), cx, cy)
+
+        if best is None:
+            return
+
+        _, mid, cx, cy = best
+        out = String()
+        out.data = f"label={mid} px={cx:.0f} py={cy:.0f}"
+        self.pub.publish(out)
+        if mid != self.last_id:
+            self.get_logger().info(f"Detected nearest marker: {out.data}")
+            self.last_id = mid
 
 
 def main(args=None):

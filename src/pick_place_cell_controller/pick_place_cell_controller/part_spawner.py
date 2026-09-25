@@ -22,6 +22,7 @@ FEED = (0.45, -0.85, 0.44)     # conveyor feed point
 NUM_PARCELS = 36
 SHUFFLE = True                 # set False to feed 0,1,2,... in order
 SEED = None                    # set an int for a repeatable demo order
+DEFECT_IDS = {3, 9, 17, 22, 28, 34}
 
 
 class PartSpawner(Node):
@@ -80,7 +81,10 @@ class PartSpawner(Node):
         req.pose = p
         self.cli.call_async(req)
         self.active_pub.publish(String(data=f"cube_{n}"))
-        dest = "A" if n <= 11 else ("B" if n <= 23 else "C")
+        if n in DEFECT_IDS:
+            dest = "REJECT"
+        else:
+            dest = "A" if n <= 11 else ("B" if n <= 23 else "C")
         self.get_logger().info(
             f"Fed cube_{n} (label {n} -> pallet {dest})  "
             f"[{self.idx+1}/{NUM_PARCELS}]")
