@@ -8,6 +8,7 @@ UR5e cell coordinates:
     feed  y = -0.85  ->  pick y = -0.20
 """
 import rclpy
+import time
 from rclpy.node import Node
 from std_msgs.msg import Bool, String
 from ros_gz_interfaces.srv import SetEntityPose
@@ -23,8 +24,12 @@ class ConveyorNode(Node):
         self.part_z = 0.44
         self.speed = 0.50
         self.dt = 0.05
+        self.last_update_time = time.monotonic()
         self.current_y = self.feed_y
-        self.part_name = 'cube_0'
+        #self.part_name = 'cube_0'
+        self.part_name = None
+        self.part_available = False
+        
 
         self.conveyor_run = False
         self.part_at_pick = False
@@ -39,12 +44,20 @@ class ConveyorNode(Node):
         self.create_timer(self.dt, self.update)
         self.get_logger().info(f'Conveyor initialized | feed y={self.feed_y} | pick y={self.pick_y}')
 
+
     def active_cb(self, msg):
-        if msg.data != self.part_name:
-            self.part_name = msg.data
-            self.current_y = self.feed_y
-            self.part_at_pick = False
-            self.get_logger().info(f'New active part {self.part_name} | belt reset')
+        self.part_name = msg.data
+        self.current_y = self.feed_y
+        self.part_at_pick = False
+        self.part_available = True
+
+        # Prevent stopped/waiting time from becoming motion time
+        self.last_update_time = time.monotonic()
+
+        self.get_logger().info(
+            f'New active part {self.part_name} | '
+            f'belt reset to y={self.feed_y}'
+        )
 
     def conveyor_cb(self, msg):
         prev = self.conveyor_run
@@ -52,22 +65,74 @@ class ConveyorNode(Node):
         if self.conveyor_run and not prev:
             self.get_logger().info('ConveyorRun received from PLC')
 
+
     def busy_cb(self, msg):
         rising = msg.data and not self.robot_busy
         self.robot_busy = msg.data
-        if rising and self.part_at_pick:
-            self.part_at_pick = False
-            self.get_logger().info('RobotBusy | PartAtPick cleared')
 
+        if rising:
+            if self.part_at_pick:
+                self.part_at_pick = False
+
+            # This parcel has now been taken by the robot.
+            # Do not allow the PLC to "move" it again.
+            self.part_available = False
+
+            self.get_logger().info(
+                'RobotBusy | parcel consumed | PartAtPick cleared'
+            )
+
+    #def update(self):
+        #self.part_at_pick_pub.publish(Bool(data=self.part_at_pick))
+        #if not self.conveyor_run or self.part_at_pick or self.robot_busy:
+            #return
+        #self.current_y += self.speed * self.dt      # move toward pick (+Y)
+        #if self.current_y >= self.pick_y:
+          #  self.current_y = self.pick_y
+           # self.part_at_pick = True
+           # self.get_logger().info('PART DETECTED at pick | PartAtPick=TRUE')
+       # self.set_part_pose()
+        
     def update(self):
-        self.part_at_pick_pub.publish(Bool(data=self.part_at_pick))
-        if not self.conveyor_run or self.part_at_pick or self.robot_busy:
+        now = time.monotonic()
+        elapsed = now - self.last_update_time
+        self.last_update_time = now
+
+        self.part_at_pick_pub.publish(
+            Bool(data=self.part_at_pick)
+        )
+
+        # Robot is handling previous parcel
+        if self.robot_busy:
             return
-        self.current_y += self.speed * self.dt      # move toward pick (+Y)
+
+        # IMPORTANT:
+        # ConveyorRun alone does not mean a parcel exists.
+        if not self.part_available:
+            return
+
+        # Parcel reached station; maintain its exact pick pose
+        if self.part_at_pick:
+            self.set_part_pose()
+            return
+
+        # PLC has conveyor stopped
+        if not self.conveyor_run:
+            return
+
+        # Wall-clock based conveyor movement
+        self.current_y += self.speed * elapsed
+
         if self.current_y >= self.pick_y:
             self.current_y = self.pick_y
             self.part_at_pick = True
-            self.get_logger().info('PART DETECTED at pick | PartAtPick=TRUE')
+
+            self.get_logger().info(
+                f'PART DETECTED at pick | '
+                f'{self.part_name} | '
+                f'PartAtPick=TRUE'
+            )
+
         self.set_part_pose()
 
     def set_part_pose(self):

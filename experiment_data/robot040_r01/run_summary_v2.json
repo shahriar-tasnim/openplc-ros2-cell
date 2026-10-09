@@ -1,0 +1,40 @@
+{
+  "bag": "experiment_data/robot040_r01",
+  "raw_active_part_messages": 36,
+  "unique_active_parts": 36,
+  "repeated_active_part_messages": 0,
+  "completed_unique_cycles": 36,
+  "accepted_cycles": 36,
+  "expected_parcels": 36,
+  "extra_robot_cycles_excluded": 1,
+  "faulted_parcels": 0,
+  "correct_commanded_destinations": 36,
+  "command_accuracy": 1.0,
+  "vision_confirmed_parcels": 1,
+  "vision_confirmation_rate": 0.027777777777777776,
+  "parcels_with_any_detector_output_in_pick_window": 9,
+  "parcels_with_any_matching_detector_output_in_pick_window": 1,
+  "fallback_reason_counts": {
+    "fallback_no_detector_output": 27,
+    "fallback_wrong_id_seen": 8
+  },
+  "run_duration_s": 666.559846294,
+  "throughput_parcels_per_min": 3.2405192302077066,
+  "active_to_conveyor_run_mean_s": 1.288035172111111,
+  "active_to_conveyor_run_median_s": 0.0188483785,
+  "conveyor_run_to_part_at_pick_mean_s": 5.946165408861111,
+  "conveyor_run_to_part_at_pick_median_s": 5.7445051965000005,
+  "part_at_pick_to_sort_decision_mean_s": 0.9958997923611111,
+  "part_at_pick_to_sort_decision_median_s": 1.0121890705,
+  "busy_to_done_mean_s": 10.2249751815,
+  "busy_to_done_median_s": 9.626835281,
+  "robot_status_counts": {
+    "BUSY": 38,
+    "PICK": 38,
+    "LIFT": 37,
+    "PLACE_AT": 37,
+    "PRE_PICK": 37,
+    "DONE": 37,
+    "IDLE": 37
+  }
+}

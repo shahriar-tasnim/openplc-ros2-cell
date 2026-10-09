@@ -1,0 +1,28 @@
+{
+  "bag": "experiment_data/robot040_r03",
+  "raw_active_part_messages": 36,
+  "unique_active_parts": 36,
+  "repeated_active_part_messages": 0,
+  "completed_unique_cycles": 36,
+  "accepted_cycles": 36,
+  "expected_parcels": 36,
+  "extra_robot_cycles_excluded": 2,
+  "faulted_parcels": 0,
+  "vision_confirmed_parcels": 0,
+  "vision_confirmation_rate": 0.0,
+  "correct_commanded_destinations": 36,
+  "command_accuracy": 1.0,
+  "run_duration_s": 454.127273922,
+  "throughput_parcels_per_min": 4.756375853283363,
+  "busy_to_done_mean_s": 9.206782018388889,
+  "busy_to_done_median_s": 9.0545793185,
+  "robot_status_counts": {
+    "BUSY": 39,
+    "PICK": 39,
+    "LIFT": 39,
+    "PLACE_AT": 39,
+    "PRE_PICK": 39,
+    "DONE": 38,
+    "IDLE": 38
+  }
+}

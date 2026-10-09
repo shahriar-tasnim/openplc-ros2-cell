@@ -1,0 +1,28 @@
+{
+  "bag": "experiment_data/baseline_trial_002",
+  "raw_active_part_messages": 36,
+  "unique_active_parts": 36,
+  "repeated_active_part_messages": 0,
+  "completed_unique_cycles": 36,
+  "accepted_cycles": 36,
+  "expected_parcels": 36,
+  "extra_robot_cycles_excluded": 2,
+  "faulted_parcels": 0,
+  "vision_confirmed_parcels": 1,
+  "vision_confirmation_rate": 0.027777777777777776,
+  "correct_commanded_destinations": 36,
+  "command_accuracy": 1.0,
+  "run_duration_s": 1060.320657481,
+  "throughput_parcels_per_min": 2.0371196059987215,
+  "busy_to_done_mean_s": 12.471984356027777,
+  "busy_to_done_median_s": 11.625896201,
+  "robot_status_counts": {
+    "BUSY": 38,
+    "PICK": 38,
+    "LIFT": 38,
+    "PLACE_AT": 38,
+    "PRE_PICK": 38,
+    "DONE": 38,
+    "IDLE": 37
+  }
+}

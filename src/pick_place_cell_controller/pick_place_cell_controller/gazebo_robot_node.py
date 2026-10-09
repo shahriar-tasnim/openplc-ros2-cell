@@ -18,7 +18,7 @@ from pick_place_cell_controller import station_poses as sp
 # a time margin keep normal operation below that baseline while allowing all
 # four destinations to receive travel time proportional to their distance.
 PLANNING_JOINT_VELOCITY = [math.pi] * 6
-DEFAULT_SPEED_SCALE = 0.60
+DEFAULT_SPEED_SCALE = 0.40
 DEFAULT_MIN_MOVE_TIME = 0.45
 DEFAULT_TRAJECTORY_MARGIN = 1.15
 

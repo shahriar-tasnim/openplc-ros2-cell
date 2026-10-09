@@ -1,0 +1,12 @@
+run_id: baseline_run_01
+parcel_count: 36
+
+robot_speed_scale: 0.60
+conveyor_speed: 0.50
+
+condition: baseline
+
+notes:
+  - 36 unique parcels completed
+  - cycles 37 and 38 excluded as post-experiment repeats
+  - parcel order randomized

@@ -1140,7 +1140,8 @@
     <!-- Eye-to-hand camera: body, lens barrel, hood, mounting bracket -->
     <model name="label_camera">
       <static>true</static>
-      <pose>0.45 -0.2 1.0 0 1.5708 0</pose>
+      <!--<pose>0.45 -0.2 1.0 0 1.5708 0</pose> -->
+      <pose>0.65 -0.20 1.00 0 1.229 3.14159</pose>
       <link name="link">
         <!-- bracket joining the camera up to the boom (boom is at world +X) -->
         <visual name="bracket">
@@ -1182,6 +1183,7 @@
         </visual>
         <sensor name="cam" type="camera">
           <camera>
+            <pose>0.085 0 0 0 0 0</pose>
             <horizontal_fov>1.1</horizontal_fov>
             <image><width>640</width><height>480</height><format>R8G8B8</format></image>
             <clip><near>0.1</near><far>5.0</far></clip>
